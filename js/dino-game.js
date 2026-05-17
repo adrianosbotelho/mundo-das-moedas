@@ -83,8 +83,9 @@ var DinoGame = {
 
     _ajustarCanvas: function() {
         var container = this.canvas.parentElement;
-        this.canvas.width = Math.min(container.clientWidth - 20, 600);
-        this.canvas.height = 250;
+        this.canvas.width = Math.min(container.clientWidth - 6, 600);
+        var alturaDisponivel = container.clientHeight;
+        this.canvas.height = Math.max(120, Math.min(alturaDisponivel - 10, 280));
     },
 
     _configurarControles: function() {

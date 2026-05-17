@@ -1431,36 +1431,52 @@ body {
     background: linear-gradient(135deg, #2ecc71, #27ae60);
 }
 
+#tela-dino {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+#tela-dino.ativa {
+    display: flex;
+}
+
 .dino-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px;
-    gap: 16px;
+    padding: 8px 12px;
+    gap: 8px;
     max-width: 640px;
     margin: 0 auto;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
 .dino-placar {
     display: flex;
     gap: 24px;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .dino-placar-item {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #333;
 }
 
 .dino-placar-valor {
     color: #e74c3c;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    min-width: 40px;
+    min-width: 36px;
     text-align: center;
 }
 
@@ -1470,6 +1486,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 1;
+    min-height: 0;
 }
 
 #dino-canvas {
@@ -1477,16 +1495,19 @@ body {
     border-radius: 12px;
     width: 100%;
     max-width: 600px;
+    flex: 1;
+    min-height: 120px;
+    max-height: 280px;
     cursor: pointer;
     touch-action: none;
 }
 
 .btn-dino-pular {
-    margin-top: 12px;
+    margin-top: 6px;
     width: 100%;
     max-width: 600px;
-    padding: 18px 0;
-    font-size: 1.5rem;
+    padding: 16px 0;
+    font-size: 1.4rem;
     font-weight: 700;
     border: none;
     border-radius: 16px;
@@ -1496,8 +1517,11 @@ body {
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
     box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
     transition: transform 0.08s;
+    flex-shrink: 0;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 }
 
 .btn-dino-pular:active {
@@ -1506,10 +1530,7 @@ body {
 }
 
 .dino-instrucao {
-    margin-top: 8px;
-    font-size: 0.85rem;
-    color: #999;
-    text-align: center;
+    display: none;
 }
 
 .dino-game-over {
@@ -1530,23 +1551,23 @@ body {
 }
 
 .dino-game-over-icone {
-    font-size: 3rem;
+    font-size: 2.5rem;
 }
 
 .dino-game-over h3 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     margin: 0;
 }
 
 .dino-game-over p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin: 2px 0;
 }
 
 .dino-game-over-botoes {
     display: flex;
     gap: 12px;
-    margin-top: 12px;
+    margin-top: 8px;
 }
 
 .dino-game-over .btn-principal {
