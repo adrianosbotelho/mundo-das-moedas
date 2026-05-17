@@ -6,19 +6,6 @@ var App = {
         this.progresso = Storage.carregar();
         Moedas.configurarEventos();
         this.atualizarMascoteInicio();
-        this._atualizarBotaoMinigame();
-    },
-
-    _atualizarBotaoMinigame: function() {
-        var card = document.getElementById('modo-minigame');
-        if (!card) return;
-        if (this.progresso.acertosTotal >= 10) {
-            card.classList.remove('modo-bloqueado');
-            var cadeado = card.querySelector('.cadeado');
-            if (cadeado) cadeado.style.display = 'none';
-            var desc = card.querySelector('p');
-            if (desc) desc.textContent = 'Ajude a Moedinha a correr e coletar moedas!';
-        }
     },
 
     mostrarTela: function(id) {
@@ -35,7 +22,6 @@ var App = {
         if (DinoGame.ativo) DinoGame.parar();
         this.mostrarTela('tela-inicio');
         this.atualizarMascoteInicio();
-        this._atualizarBotaoMinigame();
     },
 
     iniciarJogo: function() {
@@ -54,10 +40,6 @@ var App = {
         }
 
         if (modo === 'minigame') {
-            if (this.progresso.acertosTotal < 10) {
-                this._mostrarMascoteDica('Você precisa de 10 acertos para desbloquear o mini-jogo! Faltam ' + (10 - this.progresso.acertosTotal) + '! 💪');
-                return;
-            }
             this.mostrarTela('tela-dino');
             DinoGame.iniciar();
             return;
