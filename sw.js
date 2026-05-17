@@ -1,4 +1,4 @@
-var CACHE_NAME = 'moedas-v1';
+var CACHE_NAME = 'moedas-v2';
 var ASSETS = [
   '/',
   '/index.html',
@@ -9,6 +9,7 @@ var ASSETS = [
   '/js/adaptive.js',
   '/js/coins.js',
   '/js/rewards.js',
+  '/js/dino-game.js',
   '/js/conta-mode.js',
   '/js/app.js',
   '/manifest.json',

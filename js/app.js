@@ -5,6 +5,20 @@ var App = {
     init: function() {
         this.progresso = Storage.carregar();
         Moedas.configurarEventos();
+        this.atualizarMascoteInicio();
+        this._atualizarBotaoMinigame();
+    },
+
+    _atualizarBotaoMinigame: function() {
+        var card = document.getElementById('modo-minigame');
+        if (!card) return;
+        if (this.progresso.acertosTotal >= 10) {
+            card.classList.remove('modo-bloqueado');
+            var cadeado = card.querySelector('.cadeado');
+            if (cadeado) cadeado.style.display = 'none';
+            var desc = card.querySelector('p');
+            if (desc) desc.textContent = 'Ajude a Moedinha a correr e coletar moedas!';
+        }
     },
 
     mostrarTela: function(id) {
@@ -18,7 +32,10 @@ var App = {
     },
 
     voltarInicio: function() {
+        if (DinoGame.ativo) DinoGame.parar();
         this.mostrarTela('tela-inicio');
+        this.atualizarMascoteInicio();
+        this._atualizarBotaoMinigame();
     },
 
     iniciarJogo: function() {
@@ -36,6 +53,16 @@ var App = {
             return;
         }
 
+        if (modo === 'minigame') {
+            if (this.progresso.acertosTotal < 10) {
+                this._mostrarMascoteDica('Você precisa de 10 acertos para desbloquear o mini-jogo! Faltam ' + (10 - this.progresso.acertosTotal) + '! 💪');
+                return;
+            }
+            this.mostrarTela('tela-dino');
+            DinoGame.iniciar();
+            return;
+        }
+
         this.mostrarTela('tela-jogo');
 
         switch (modo) {
@@ -49,6 +76,48 @@ var App = {
                 Jogo.iniciarLivre();
                 break;
         }
+    },
+
+    _mostrarMascoteDica: function(msg) {
+        var balao = document.getElementById('balao-inicio');
+        if (balao) {
+            balao.querySelector('p').textContent = msg;
+            balao.classList.add('balao-destaque');
+            setTimeout(function() { balao.classList.remove('balao-destaque'); }, 3000);
+        }
+    },
+
+    atualizarMascoteInicio: function() {
+        var msgs = [];
+        var p = this.progresso;
+
+        if (p.acertosTotal === 0) {
+            msgs = ['Oi! Eu sou a Moedinha! Vamos aprender juntos? 🦊'];
+        } else if (p.sequenciaAtual >= 5) {
+            msgs = [
+                'Você está com tudo! ' + p.sequenciaAtual + ' acertos seguidos! 🔥',
+                'Incrível! Continue assim, campeão! ⭐'
+            ];
+        } else if (p.acertosTotal >= 10 && !p.badges.includes('minigame')) {
+            msgs = ['Parabéns! Você desbloqueou o mini-jogo! Vá em Modos de Jogo! 🎮'];
+        } else if (p.nivel >= 6) {
+            msgs = [
+                'Uau! Nível ' + p.nivel + '! Você está ficando fera! 💪',
+                'Que orgulho! Já tem ' + p.estrelas + ' estrelas! 🌟',
+                'Quer treinar mais? Tem modos novos esperando! 🎯'
+            ];
+        } else {
+            msgs = [
+                'Que bom te ver de novo! Vamos jogar? 😊',
+                'Você já tem ' + p.estrelas + ' estrelas! Vamos ganhar mais? ⭐',
+                'A Moedinha sentiu sua falta! Bora jogar! 🦊',
+                'Oi! Pronto para mais desafios? 🎮'
+            ];
+        }
+
+        var msg = msgs[Math.floor(Math.random() * msgs.length)];
+        var balao = document.getElementById('balao-inicio');
+        if (balao) balao.querySelector('p').textContent = msg;
     }
 };
 

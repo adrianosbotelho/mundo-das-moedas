@@ -4,31 +4,52 @@ const Recompensas = {
         { id: 'primeiro_acerto', nome: 'Primeiro Passo', icone: '🌱', descricao: 'Primeiro acerto!' },
         { id: 'seq_5', nome: 'Em chamas!', icone: '🔥', descricao: '5 acertos seguidos' },
         { id: 'seq_10', nome: 'Imparável!', icone: '⚡', descricao: '10 acertos seguidos' },
+        { id: 'seq_20', nome: 'Lendário!', icone: '🌈', descricao: '20 acertos seguidos' },
         { id: 'nivel_2', nome: 'Moeda de 25', icone: '🥈', descricao: 'Chegou ao nível 2' },
         { id: 'nivel_3', nome: 'Moeda de 50', icone: '🥇', descricao: 'Chegou ao nível 3' },
         { id: 'nivel_4', nome: 'Real!', icone: '💎', descricao: 'Chegou ao nível 4' },
         { id: 'nivel_5', nome: 'Mestre', icone: '👑', descricao: 'Chegou ao nível 5' },
+        { id: 'nivel_6', nome: 'Vai-Um!', icone: '🧮', descricao: 'Chegou ao nível 6' },
+        { id: 'nivel_7', nome: 'Troco Esperto', icone: '🦉', descricao: 'Chegou ao nível 7' },
+        { id: 'nivel_8', nome: 'Mercado', icone: '🛍️', descricao: 'Chegou ao nível 8' },
+        { id: 'nivel_9', nome: 'Cabeça', icone: '🧠', descricao: 'Chegou ao nível 9' },
+        { id: 'nivel_10', nome: 'Grande Mestre', icone: '🏅', descricao: 'Chegou ao nível 10' },
         { id: 'estrelas_10', nome: 'Colecionador', icone: '⭐', descricao: '10 estrelas' },
         { id: 'estrelas_50', nome: 'Brilhante', icone: '🌟', descricao: '50 estrelas' },
         { id: 'estrelas_100', nome: 'Superestrela', icone: '💫', descricao: '100 estrelas' },
+        { id: 'estrelas_200', nome: 'Galáxia', icone: '🌌', descricao: '200 estrelas' },
         { id: 'troco_5', nome: 'Vendedor', icone: '🛒', descricao: '5 trocos corretos' },
-        { id: 'sem_dica', nome: 'Independente', icone: '🧠', descricao: '10 sem usar dica' }
+        { id: 'sem_dica', nome: 'Independente', icone: '🧠', descricao: '10 sem usar dica' },
+        { id: 'minigame', nome: 'Gamer!', icone: '🎮', descricao: 'Desbloqueou o mini-jogo!' },
+        { id: 'dino_50', nome: 'Corredor', icone: '🏃', descricao: '50 pontos no mini-jogo' },
+        { id: 'dino_100', nome: 'Velocista', icone: '🚀', descricao: '100 pontos no mini-jogo' }
     ],
 
     verificarBadges(progresso) {
         const novas = [];
 
+        var dinoPontos = parseInt(localStorage.getItem('dino_melhor') || '0');
         const checks = {
             'primeiro_acerto': progresso.acertosTotal >= 1,
             'seq_5': progresso.melhorSequencia >= 5,
             'seq_10': progresso.melhorSequencia >= 10,
+            'seq_20': progresso.melhorSequencia >= 20,
             'nivel_2': progresso.nivel >= 2,
             'nivel_3': progresso.nivel >= 3,
             'nivel_4': progresso.nivel >= 4,
             'nivel_5': progresso.nivel >= 5,
+            'nivel_6': progresso.nivel >= 6,
+            'nivel_7': progresso.nivel >= 7,
+            'nivel_8': progresso.nivel >= 8,
+            'nivel_9': progresso.nivel >= 9,
+            'nivel_10': progresso.nivel >= 10,
             'estrelas_10': progresso.estrelas >= 10,
             'estrelas_50': progresso.estrelas >= 50,
-            'estrelas_100': progresso.estrelas >= 100
+            'estrelas_100': progresso.estrelas >= 100,
+            'estrelas_200': progresso.estrelas >= 200,
+            'minigame': progresso.acertosTotal >= 10,
+            'dino_50': dinoPontos >= 50,
+            'dino_100': dinoPontos >= 100
         };
 
         Object.entries(checks).forEach(([id, condicao]) => {

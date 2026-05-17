@@ -71,51 +71,75 @@ const Adaptativo = {
         return null;
     },
 
-    // Gera mensagem de incentivo baseada no contexto
     mensagemIncentivo(progresso, acertou, tentativas) {
         if (acertou) {
+            if (progresso.sequenciaAtual >= 10) {
+                return this._sortear([
+                    "INACREDITÁVEL! " + progresso.sequenciaAtual + " seguidos! Você é demais! 🌈",
+                    "Que coisa mais linda! A Moedinha está orgulhosa! 🦊✨",
+                    "Isso é histórico! Ninguém te segura! 🚀🔥"
+                ]);
+            }
             if (progresso.sequenciaAtual >= 5) {
                 return this._sortear([
                     "Incrível! Você está em uma sequência fantástica! 🔥",
                     "Uau! Ninguém te para! 🚀",
-                    "Que sequência maravilhosa! Continue assim! ⭐"
+                    "Que sequência maravilhosa! Continue assim! ⭐",
+                    "A Moedinha está dançando de alegria! 🦊💃"
                 ]);
             }
             if (progresso.sequenciaAtual >= 3) {
                 return this._sortear([
                     "Muito bem! Você está pegando o jeito! 🌟",
                     "Excelente! Isso aí! 💪",
-                    "Boa! Continue assim que está ótimo! 😊"
+                    "Boa! Continue assim que está ótimo! 😊",
+                    "Tá ficando fera! A Moedinha tá impressionada! 🦊"
                 ]);
             }
             if (tentativas === 1) {
                 return this._sortear([
                     "Perfeito! De primeira! 🎯",
                     "Acertou de cara! Demais! 🏆",
-                    "Parabéns! Certinho! ✨"
+                    "Parabéns! Certinho! ✨",
+                    "Wow! Nem precisou pensar duas vezes! 🧠",
+                    "Resposta na lata! Incrível! 🎯"
                 ]);
+            }
+            if (progresso.acertosTotal === 10) {
+                return "🎮 PARABÉNS! Você desbloqueou o mini-jogo Corrida da Moedinha! Vá em Modos de Jogo!";
             }
             return this._sortear([
                 "Isso! Muito bem! 😊",
                 "Boa! Conseguiu! 🎉",
                 "Legal! Acertou! ⭐",
-                "Mandou bem! 👏"
+                "Mandou bem! 👏",
+                "A Moedinha ficou feliz! 🦊",
+                "Arrasou! Continue assim! 💪"
             ]);
         }
 
-        // Mensagens de erro (nunca negativas)
         if (tentativas >= 3) {
             return this._sortear([
                 "Quase lá! Quer uma dica? 💡",
                 "Tá pertinho! Vou te ajudar! 🤗",
-                "Não desista! Vamos juntos! 💪"
+                "Não desista! Vamos juntos! 💪",
+                "A Moedinha acredita em você! Tenta mais uma vez! 🦊",
+                "Calma, respira! Você vai conseguir! 🌟"
+            ]);
+        }
+        if (tentativas >= 2) {
+            return this._sortear([
+                "Quase! Olha bem os valores das moedas! 👀",
+                "Tá perto! Conta nos dedinhos se precisar! 🖐️",
+                "Hmm, tenta montar de outro jeito! 🔄"
             ]);
         }
         return this._sortear([
             "Ops! Tenta de novo! Você consegue! 😊",
             "Quase! Vamos tentar de novo! 🌟",
             "Hmm, não foi dessa vez. Mais uma tentativa! 💪",
-            "Eita! Mas tá no caminho certo! 😄"
+            "Eita! Mas tá no caminho certo! 😄",
+            "Opa! Que tal tentar com outras moedas? 🪙"
         ]);
     },
 

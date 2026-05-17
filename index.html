@@ -188,6 +188,12 @@
                     <h3>Modo Livre</h3>
                     <p>Brinque com as moedas sem pressa!</p>
                 </div>
+                <div class="modo-card modo-bloqueado" id="modo-minigame" onclick="App.iniciarModo('minigame')">
+                    <div class="modo-icone">🦊</div>
+                    <h3>Corrida da Moedinha</h3>
+                    <p>Acerte 10 para desbloquear! 🔒</p>
+                    <div class="cadeado">🔒</div>
+                </div>
                 <div class="modo-card modo-bloqueado" id="modo-desafio">
                     <div class="modo-icone">⏱️</div>
                     <h3>Desafio</h3>
@@ -323,6 +329,40 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tela Mini-Jogo Corrida da Moedinha -->
+        <div id="tela-dino" class="tela">
+            <header class="tela-header dino-header">
+                <button class="btn-voltar" onclick="DinoGame.voltarMenu()">←</button>
+                <h2>🦊 Corrida da Moedinha</h2>
+            </header>
+            <div class="dino-container">
+                <div class="dino-placar">
+                    <div class="dino-placar-item">
+                        <span>Pontos:</span>
+                        <span class="dino-placar-valor" id="dino-pontos">0</span>
+                    </div>
+                    <div class="dino-placar-item">
+                        <span>Recorde:</span>
+                        <span class="dino-placar-valor" id="dino-melhor">0</span>
+                    </div>
+                </div>
+                <div class="dino-canvas-container">
+                    <canvas id="dino-canvas"></canvas>
+                    <div class="dino-instrucao">Toque ou pressione ESPAÇO para pular!</div>
+                </div>
+                <div class="dino-game-over" id="dino-game-over" style="display:none">
+                    <div class="dino-game-over-icone">💥</div>
+                    <h3>Fim da corrida!</h3>
+                    <p>Pontos: <strong id="dino-final-pontos">0</strong></p>
+                    <p>Estrelas bônus: <strong id="dino-bonus-estrelas">0</strong> ⭐</p>
+                    <div class="dino-game-over-botoes">
+                        <button class="btn-principal" onclick="DinoGame.iniciar()">Jogar de novo!</button>
+                        <button class="btn-secundario" onclick="DinoGame.voltarMenu()">Voltar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="js/storage.js"></script>
@@ -331,6 +371,7 @@
     <script src="js/adaptive.js"></script>
     <script src="js/coins.js"></script>
     <script src="js/rewards.js"></script>
+    <script src="js/dino-game.js"></script>
     <script src="js/conta-mode.js"></script>
     <script src="js/app.js"></script>
     <script>
