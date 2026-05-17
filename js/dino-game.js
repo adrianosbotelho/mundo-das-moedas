@@ -14,10 +14,16 @@ var DinoGame = {
     obstaculos: [],
     moedas: [],
     particulas: [],
+    estrelasCeu: [],
     chao: 0,
     frameCount: 0,
     nuvens: [],
     tempoUltimoObstaculo: 0,
+
+    // Ciclo dia/noite
+    fase: 'dia',
+    transicao: 0, // 0 = dia puro, 1 = noite pura
+    transicaoAlvo: 0,
 
     iniciar: function() {
         this.canvas = document.getElementById('dino-canvas');
@@ -33,11 +39,15 @@ var DinoGame = {
         this.moedas = [];
         this.particulas = [];
         this.nuvens = [];
+        this.estrelasCeu = [];
         this.pontos = 0;
         this.velocidade = 4;
         this.gameOver = false;
         this.frameCount = 0;
         this.tempoUltimoObstaculo = 0;
+        this.fase = 'dia';
+        this.transicao = 0;
+        this.transicaoAlvo = 0;
         this.ativo = true;
 
         var mp = parseInt(localStorage.getItem('dino_melhor') || '0');
@@ -51,12 +61,24 @@ var DinoGame = {
             });
         }
 
+        for (var i = 0; i < 20; i++) {
+            this.estrelasCeu.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * (this.chao - 30),
+                brilho: Math.random(),
+                vel: 0.01 + Math.random() * 0.02
+            });
+        }
+
         this._configurarControles();
         this._loop();
 
         document.getElementById('dino-pontos').textContent = '0';
         document.getElementById('dino-melhor').textContent = this.melhorPontuacao;
         document.getElementById('dino-game-over').style.display = 'none';
+
+        var btnPular = document.getElementById('btn-dino-pular');
+        if (btnPular) btnPular.style.display = '';
     },
 
     _ajustarCanvas: function() {
@@ -83,11 +105,27 @@ var DinoGame = {
         document.addEventListener('keydown', this._onKeyDown);
         this.canvas.addEventListener('touchstart', this._onTouch, { passive: false });
         this.canvas.addEventListener('click', function() { self._pular(); });
+
+        var btnPular = document.getElementById('btn-dino-pular');
+        if (btnPular) {
+            this._onBtnPular = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                self._pular();
+            };
+            btnPular.addEventListener('touchstart', this._onBtnPular, { passive: false });
+            btnPular.onclick = this._onBtnPular;
+        }
     },
 
     _removerControles: function() {
         if (this._onKeyDown) document.removeEventListener('keydown', this._onKeyDown);
         if (this._onTouch) this.canvas.removeEventListener('touchstart', this._onTouch);
+        var btnPular = document.getElementById('btn-dino-pular');
+        if (btnPular && this._onBtnPular) {
+            btnPular.removeEventListener('touchstart', this._onBtnPular);
+            btnPular.onclick = null;
+        }
     },
 
     _pular: function() {
@@ -131,22 +169,30 @@ var DinoGame = {
             this.velocidade += 0.3;
         }
 
+        // Ciclo dia/noite: alterna a cada 100 pontos
+        this._atualizarCiclo();
+
         // Gerar obstaculos
         this.tempoUltimoObstaculo++;
         var intervaloMin = Math.max(60, 120 - this.pontos);
         if (this.tempoUltimoObstaculo > intervaloMin && Math.random() < 0.03) {
-            var tipos = [
-                { largura: 20, altura: 30, cor: '#8B4513', emoji: '🌵' },
-                { largura: 24, altura: 24, cor: '#FF6347', emoji: '🧱' },
-                { largura: 18, altura: 34, cor: '#228B22', emoji: '🌲' }
+            var tiposDia = [
+                { largura: 20, altura: 30, emoji: '🌵' },
+                { largura: 24, altura: 24, emoji: '🧱' },
+                { largura: 18, altura: 34, emoji: '🌲' }
             ];
+            var tiposNoite = [
+                { largura: 20, altura: 30, emoji: '👻' },
+                { largura: 24, altura: 28, emoji: '🦇' },
+                { largura: 18, altura: 34, emoji: '🌲' }
+            ];
+            var tipos = this.fase === 'noite' ? tiposNoite : tiposDia;
             var tipo = tipos[Math.floor(Math.random() * tipos.length)];
             this.obstaculos.push({
                 x: this.canvas.width + 10,
                 y: this.chao - tipo.altura,
                 largura: tipo.largura,
                 altura: tipo.altura,
-                cor: tipo.cor,
                 emoji: tipo.emoji
             });
             this.tempoUltimoObstaculo = 0;
@@ -185,6 +231,12 @@ var DinoGame = {
             }
         });
 
+        // Piscar estrelas do ceu
+        this.estrelasCeu.forEach(function(e) {
+            e.brilho += e.vel;
+            if (e.brilho > 1 || e.brilho < 0) e.vel = -e.vel;
+        });
+
         // Mover particulas
         this.particulas = this.particulas.filter(function(p) {
             p.x += p.vx;
@@ -213,7 +265,6 @@ var DinoGame = {
                 m.coletada = true;
                 this.pontos += 5;
                 Sons.tocar('moeda');
-                // Particulas de coleta
                 for (var p = 0; p < 6; p++) {
                     this.particulas.push({
                         x: m.x, y: m.y,
@@ -233,20 +284,81 @@ var DinoGame = {
         }
     },
 
+    _atualizarCiclo: function() {
+        var ciclo = Math.floor(this.pontos / 100) % 2;
+        if (ciclo === 1 && this.fase !== 'noite') {
+            this.fase = 'noite';
+            this.transicaoAlvo = 1;
+        } else if (ciclo === 0 && this.fase !== 'dia') {
+            this.fase = 'dia';
+            this.transicaoAlvo = 0;
+        }
+
+        // Transicao suave
+        if (this.transicao < this.transicaoAlvo) {
+            this.transicao = Math.min(this.transicao + 0.008, 1);
+        } else if (this.transicao > this.transicaoAlvo) {
+            this.transicao = Math.max(this.transicao - 0.008, 0);
+        }
+    },
+
+    _lerp: function(a, b, t) {
+        return a + (b - a) * t;
+    },
+
+    _lerpCor: function(r1, g1, b1, r2, g2, b2, t) {
+        return 'rgb(' +
+            Math.round(this._lerp(r1, r2, t)) + ',' +
+            Math.round(this._lerp(g1, g2, t)) + ',' +
+            Math.round(this._lerp(b1, b2, t)) + ')';
+    },
+
     _desenhar: function() {
         var ctx = this.ctx;
         var w = this.canvas.width;
         var h = this.canvas.height;
+        var t = this.transicao;
 
-        // Ceu gradiente
+        // Ceu com transicao dia/noite
         var grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, '#87CEEB');
-        grad.addColorStop(1, '#E0F0FF');
+        var ceuTopo = this._lerpCor(135, 206, 235, 15, 15, 50, t);
+        var ceuBase = this._lerpCor(224, 240, 255, 30, 30, 80, t);
+        grad.addColorStop(0, ceuTopo);
+        grad.addColorStop(1, ceuBase);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
 
-        // Nuvens
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        // Lua (noite)
+        if (t > 0.3) {
+            var luaAlpha = Math.min((t - 0.3) / 0.3, 1);
+            ctx.globalAlpha = luaAlpha;
+            ctx.fillStyle = '#FFFDE7';
+            ctx.beginPath();
+            ctx.arc(w - 60, 45, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = ceuTopo;
+            ctx.beginPath();
+            ctx.arc(w - 52, 40, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        // Estrelas do ceu (noite)
+        if (t > 0.2) {
+            var estAlpha = Math.min((t - 0.2) / 0.3, 1);
+            var self = this;
+            this.estrelasCeu.forEach(function(e) {
+                ctx.globalAlpha = estAlpha * e.brilho * 0.8;
+                ctx.fillStyle = '#FFF';
+                ctx.fillRect(e.x, e.y, 2, 2);
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        // Nuvens (mais escuras a noite)
+        var nuvemCor = this._lerpCor(255, 255, 255, 60, 60, 90, t);
+        ctx.fillStyle = nuvemCor;
+        ctx.globalAlpha = this._lerp(0.8, 0.4, t);
         this.nuvens.forEach(function(n) {
             ctx.beginPath();
             ctx.arc(n.x, n.y, 15, 0, Math.PI * 2);
@@ -254,15 +366,19 @@ var DinoGame = {
             ctx.arc(n.x + 30, n.y, 15, 0, Math.PI * 2);
             ctx.fill();
         });
+        ctx.globalAlpha = 1;
 
         // Chao
-        ctx.fillStyle = '#8B7355';
+        var chaoCor = this._lerpCor(139, 115, 85, 50, 40, 30, t);
+        ctx.fillStyle = chaoCor;
         ctx.fillRect(0, this.chao, w, h - this.chao);
-        ctx.fillStyle = '#6B8E23';
+        var gramaCor = this._lerpCor(107, 142, 35, 30, 60, 20, t);
+        ctx.fillStyle = gramaCor;
         ctx.fillRect(0, this.chao, w, 4);
 
         // Linhas do chao
-        ctx.strokeStyle = '#7A6B4F';
+        var linhaCor = this._lerpCor(122, 107, 79, 40, 35, 25, t);
+        ctx.strokeStyle = linhaCor;
         ctx.lineWidth = 1;
         for (var i = 0; i < w; i += 30) {
             var offset = (this.frameCount * this.velocidade + i) % w;
@@ -273,7 +389,6 @@ var DinoGame = {
         }
 
         // Obstaculos
-        var self = this;
         ctx.font = '28px serif';
         ctx.textAlign = 'center';
         this.obstaculos.forEach(function(o) {
@@ -283,6 +398,15 @@ var DinoGame = {
         // Moedas
         this.moedas.forEach(function(m) {
             if (m.coletada) return;
+            // Brilho ao redor da moeda a noite
+            if (t > 0.3) {
+                ctx.globalAlpha = t * 0.3;
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(m.x + 8, m.y + 8, 16, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
             ctx.fillStyle = '#FFD700';
             ctx.beginPath();
             ctx.arc(m.x + 8, m.y + 8, 10, 0, Math.PI * 2);
@@ -310,7 +434,7 @@ var DinoGame = {
         ctx.textAlign = 'center';
 
         // Sombra do jogador
-        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillStyle = 'rgba(0,0,0,' + this._lerp(0.15, 0.05, t) + ')';
         ctx.beginPath();
         ctx.ellipse(j.x + j.largura / 2, this.chao + 2, 18, 6, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -325,6 +449,14 @@ var DinoGame = {
             ctx.fillText('🦊', j.x + j.largura / 2, j.y + j.altura - 2);
             ctx.restore();
         }
+
+        // Indicador dia/noite
+        if (t > 0.1 || t < 0.9) {
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = t > 0.5 ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.3)';
+            ctx.fillText(t > 0.5 ? '🌙 Noite' : '☀️ Dia', 8, 20);
+        }
     },
 
     _fimDeJogo: function() {
@@ -337,7 +469,6 @@ var DinoGame = {
             document.getElementById('dino-melhor').textContent = this.melhorPontuacao;
         }
 
-        // Estrelas bonus por jogar bem
         var estrelasBonus = Math.floor(this.pontos / 20);
         if (estrelasBonus > 0) {
             App.progresso.estrelas += estrelasBonus;
@@ -348,6 +479,9 @@ var DinoGame = {
         document.getElementById('dino-final-pontos').textContent = this.pontos;
         document.getElementById('dino-bonus-estrelas').textContent = estrelasBonus;
         overEl.style.display = 'flex';
+
+        var btnPular = document.getElementById('btn-dino-pular');
+        if (btnPular) btnPular.style.display = 'none';
     },
 
     parar: function() {
