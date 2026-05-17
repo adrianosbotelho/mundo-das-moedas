@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mundo das Moedas - Aprenda brincando!</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Moedas">
+    <link rel="apple-touch-icon" href="icons/icon-180.png">
+
+    <!-- Splash screens iOS -->
+    <link rel="apple-touch-startup-image" href="icons/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+    <link rel="apple-touch-startup-image" href="icons/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Tela Inicial -->
+        <div id="tela-inicio" class="tela ativa">
+            <div class="inicio-container">
+                <div class="logo-animada">
+                    <div class="moeda-logo moeda-1real">1</div>
+                    <h1>Mundo das Moedas</h1>
+                    <p class="subtitulo">Aprenda a contar dinheiro brincando!</p>
+                </div>
+                <div class="mascote-container">
+                    <div class="mascote" id="mascote-inicio">🦊</div>
+                    <div class="balao-fala" id="balao-inicio">
+                        <p>Oi! Eu sou a Moedinha! Vamos aprender juntos?</p>
+                    </div>
+                </div>
+                <div class="inicio-botoes">
+                    <button class="btn-principal" onclick="App.iniciarJogo()">
+                        <span class="btn-icone">🎮</span> Jogar!
+                    </button>
+                    <button class="btn-secundario" onclick="App.mostrarTela('tela-modos')">
+                        <span class="btn-icone">🎯</span> Modos de Jogo
+                    </button>
+                    <button class="btn-secundario" onclick="App.mostrarTela('tela-stats')">
+                        <span class="btn-icone">📊</span> Meu Progresso
+                    </button>
+                </div>
+                <div class="config-audio">
+                    <button class="btn-audio" id="btn-audio" onclick="Sons.toggle()">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela do Jogo -->
+        <div id="tela-jogo" class="tela">
+            <header class="jogo-header">
+                <div class="header-esquerda">
+                    <button class="btn-voltar" onclick="App.voltarInicio()">←</button>
+                    <div class="nivel-info">
+                        <span class="nivel-badge" id="nivel-badge">Nível 1</span>
+                        <span class="fase-texto" id="fase-texto">Primeiros Passos</span>
+                    </div>
+                </div>
+                <div class="header-centro">
+                    <div class="estrelas-container" id="estrelas-header">
+                        <span class="estrela">⭐</span>
+                        <span class="estrelas-count" id="estrelas-count">0</span>
+                    </div>
+                </div>
+                <div class="header-direita">
+                    <div class="progresso-fase">
+                        <div class="progresso-barra">
+                            <div class="progresso-fill" id="progresso-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progresso-texto" id="progresso-texto">0/5</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="jogo-area">
+                <!-- Mascote e instrucao -->
+                <div class="instrucao-container">
+                    <div class="mascote-mini">🦊</div>
+                    <div class="balao-instrucao" id="balao-instrucao">
+                        <p id="texto-instrucao">Arraste moedas para formar o valor!</p>
+                    </div>
+                </div>
+
+                <!-- Valor alvo -->
+                <div class="valor-alvo-container">
+                    <div class="valor-alvo" id="valor-alvo">
+                        <span class="valor-label">Forme:</span>
+                        <span class="valor-numero" id="valor-numero">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Caderno: area da conta vertical -->
+                <div class="caderno-container" id="caderno-container">
+                    <div class="caderno" id="caderno">
+                        <div class="caderno-titulo">Monte a conta:</div>
+                        <div class="caderno-linhas" id="caderno-linhas">
+                            <div class="caderno-drop-zone" id="drop-zona" data-placeholder="Arraste moedas aqui!">
+                            </div>
+                        </div>
+                        <div class="caderno-resultado" id="caderno-resultado">
+                            <span class="caderno-igual">=</span>
+                            <span class="caderno-total" id="caderno-total">0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Moedas disponiveis para arrastar -->
+                <div class="moedas-disponiveis" id="moedas-disponiveis">
+                    <!-- Moedas geradas por JS -->
+                </div>
+
+                <!-- Deposito oculto para compatibilidade -->
+                <div id="deposito-moedas" style="display:none"></div>
+
+                <!-- Botoes de acao -->
+                <div class="acoes-container">
+                    <button class="btn-limpar" id="btn-limpar" onclick="Jogo.limparDeposito()">
+                        🗑️ Limpar
+                    </button>
+                    <button class="btn-confirmar" id="btn-confirmar" onclick="Jogo.verificarResposta()">
+                        ✅ Confirmar!
+                    </button>
+                    <button class="btn-dica" id="btn-dica" onclick="Jogo.mostrarDica()">
+                        💡 Dica
+                    </button>
+                </div>
+            </main>
+
+            <!-- Feedback overlay -->
+            <div class="feedback-overlay" id="feedback-overlay">
+                <div class="feedback-conteudo" id="feedback-conteudo">
+                    <div class="feedback-icone" id="feedback-icone">🎉</div>
+                    <p class="feedback-texto" id="feedback-texto">Parabéns!</p>
+                    <p class="feedback-detalhe" id="feedback-detalhe"></p>
+                    <button class="btn-proximo" id="btn-proximo" onclick="Jogo.proximoDesafio()">
+                        Próximo →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Celebracao de nivel -->
+            <div class="celebracao-overlay" id="celebracao-overlay">
+                <div class="celebracao-conteudo">
+                    <div class="confetes" id="confetes"></div>
+                    <div class="celebracao-icone">🏆</div>
+                    <h2 class="celebracao-titulo" id="celebracao-titulo">Nível Completo!</h2>
+                    <p class="celebracao-texto" id="celebracao-texto"></p>
+                    <div class="recompensa-badge" id="recompensa-badge"></div>
+                    <button class="btn-principal" onclick="Jogo.avancarNivel()">
+                        Continuar! 🚀
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Modos -->
+        <div id="tela-modos" class="tela">
+            <header class="tela-header">
+                <button class="btn-voltar" onclick="App.voltarInicio()">←</button>
+                <h2>Modos de Jogo</h2>
+            </header>
+            <div class="modos-grid">
+                <div class="modo-card" onclick="App.iniciarModo('aventura')">
+                    <div class="modo-icone">🗺️</div>
+                    <h3>Aventura</h3>
+                    <p>Siga a história e aprenda passo a passo!</p>
+                </div>
+                <div class="modo-card" onclick="App.iniciarModo('conta')">
+                    <div class="modo-icone">✏️</div>
+                    <h3>Fazer a Conta</h3>
+                    <p>Monte a resposta arrastando os números!</p>
+                </div>
+                <div class="modo-card" onclick="App.iniciarModo('troco')">
+                    <div class="modo-icone">🛒</div>
+                    <h3>Troco</h3>
+                    <p>Pratique dar troco na lojinha!</p>
+                </div>
+                <div class="modo-card" onclick="App.iniciarModo('livre')">
+                    <div class="modo-icone">🎨</div>
+                    <h3>Modo Livre</h3>
+                    <p>Brinque com as moedas sem pressa!</p>
+                </div>
+                <div class="modo-card modo-bloqueado" id="modo-desafio">
+                    <div class="modo-icone">⏱️</div>
+                    <h3>Desafio</h3>
+                    <p>Contra o tempo! (Desbloqueie no nível 5)</p>
+                    <div class="cadeado">🔒</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Estatisticas -->
+        <div id="tela-stats" class="tela">
+            <header class="tela-header">
+                <button class="btn-voltar" onclick="App.voltarInicio()">←</button>
+                <h2>Meu Progresso</h2>
+            </header>
+            <div class="stats-container">
+                <div class="stats-resumo">
+                    <div class="stat-card">
+                        <div class="stat-icone">⭐</div>
+                        <div class="stat-valor" id="stat-estrelas">0</div>
+                        <div class="stat-label">Estrelas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icone">🎯</div>
+                        <div class="stat-valor" id="stat-acertos">0</div>
+                        <div class="stat-label">Acertos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icone">🏆</div>
+                        <div class="stat-valor" id="stat-nivel">1</div>
+                        <div class="stat-label">Nível</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icone">🔥</div>
+                        <div class="stat-valor" id="stat-sequencia">0</div>
+                        <div class="stat-label">Melhor Sequência</div>
+                    </div>
+                </div>
+                <div class="badges-section">
+                    <h3>🏅 Conquistas</h3>
+                    <div class="badges-grid" id="badges-grid">
+                        <!-- Preenchido por JS -->
+                    </div>
+                </div>
+                <div class="stats-pais">
+                    <h3>📊 Para os Pais</h3>
+                    <div class="pais-info" id="pais-info">
+                        <!-- Preenchido por JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Tela Modo Conta -->
+        <div id="tela-conta" class="tela">
+            <header class="jogo-header">
+                <div class="header-esquerda">
+                    <button class="btn-voltar" onclick="App.voltarInicio()">←</button>
+                    <div class="nivel-info">
+                        <span class="nivel-badge" id="conta-nivel-badge">Nível 1</span>
+                        <span class="fase-texto">Fazer a Conta</span>
+                    </div>
+                </div>
+                <div class="header-centro">
+                    <div class="estrelas-container">
+                        <span class="estrela">⭐</span>
+                        <span class="estrelas-count" id="conta-estrelas">0</span>
+                    </div>
+                </div>
+                <div class="header-direita">
+                    <div class="progresso-fase">
+                        <div class="progresso-barra">
+                            <div class="progresso-fill" id="conta-progresso-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progresso-texto" id="conta-progresso-texto">0/8</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="jogo-area">
+                <div class="instrucao-container">
+                    <div class="mascote-mini">🦊</div>
+                    <div class="balao-instrucao">
+                        <p id="conta-instrucao">Quanto dá essa conta? Arraste os números!</p>
+                    </div>
+                </div>
+
+                <!-- Conta para resolver -->
+                <div class="conta-problema-container">
+                    <div class="conta-problema" id="conta-problema">
+                        <!-- Gerado por JS -->
+                    </div>
+                </div>
+
+                <!-- Area de resposta -->
+                <div class="conta-resposta-container">
+                    <div class="conta-resposta-label">Sua resposta:</div>
+                    <div class="conta-resposta" id="conta-resposta">
+                        <div class="conta-resposta-slots" id="conta-resposta-slots">
+                            <!-- Slots gerados por JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Algarismos para arrastar -->
+                <div class="algarismos-container" id="algarismos-container">
+                    <div class="algarismo" data-valor="0">0</div>
+                    <div class="algarismo" data-valor="1">1</div>
+                    <div class="algarismo" data-valor="2">2</div>
+                    <div class="algarismo" data-valor="3">3</div>
+                    <div class="algarismo" data-valor="4">4</div>
+                    <div class="algarismo" data-valor="5">5</div>
+                    <div class="algarismo" data-valor="6">6</div>
+                    <div class="algarismo" data-valor="7">7</div>
+                    <div class="algarismo" data-valor="8">8</div>
+                    <div class="algarismo" data-valor="9">9</div>
+                    <div class="algarismo algarismo-virgula" data-valor=",">,</div>
+                </div>
+
+                <div class="acoes-container">
+                    <button class="btn-limpar" onclick="ContaMode.limpar()">🗑️ Limpar</button>
+                    <button class="btn-confirmar" onclick="ContaMode.verificar()">✅ Confirmar!</button>
+                    <button class="btn-dica" onclick="ContaMode.dica()">💡 Dica</button>
+                </div>
+            </main>
+
+            <!-- Feedback overlay (reutiliza IDs separados) -->
+            <div class="feedback-overlay" id="conta-feedback-overlay">
+                <div class="feedback-conteudo">
+                    <div class="feedback-icone" id="conta-feedback-icone">🎉</div>
+                    <p class="feedback-texto" id="conta-feedback-texto">Parabéns!</p>
+                    <p class="feedback-detalhe" id="conta-feedback-detalhe"></p>
+                    <button class="btn-proximo" id="conta-btn-proximo">Próximo →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/sounds.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/adaptive.js"></script>
+    <script src="js/coins.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/conta-mode.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
+    </script>
+</body>
+</html>
